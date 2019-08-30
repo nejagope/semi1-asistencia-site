@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Asistencia</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>    
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <style type="text/css">
+        /* Copy this code in your css file. */
+
+        html,body
+        {
+            width: 500px;
+            margin: auto;
+        }
+        .container
+        {
+            width: 500px;
+            margin: 20px auto;
+        }
+
+        .preview
+        {
+            padding: 10px;
+            position: relative;
+        }
+
+        .preview i
+        {
+            color: white;
+            font-size: 35px;
+            transform: translate(50px,130px);
+        }
+
+        .preview-img
+        {
+            border-radius: 1%;
+            box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.7);
+        }
+
+        .browse-button
+        {
+            width: 400px;
+            height: 400px;
+            border-radius: 0%;
+            position: absolute; /* Tweak the position property if the element seems to be unfit */
+            top: 10px;
+            left: 30px;
+            background: linear-gradient(180deg, transparent, black);
+            opacity: 0;
+            transition: 0.3s ease;
+        }
+
+        .browse-button:hover
+        {
+            opacity: 1;
+        }
+
+        .browse-input
+        {
+            width: 400px;
+            height: 400px;
+            border-radius: 0%;
+            transform: translate(-1px,-26px);
+            opacity: 0;
+        }
+
+        .form-group
+        {
+            width:  400px;
+            margin: 10px auto;
+        }
+
+        .form-group input
+        {
+            transition: 0.3s linear;
+        }
+
+        .form-group input:focus
+        {
+            border: 1px solid crimson;
+            box-shadow: 0 0 0 0;
+        }
+
+        .Error
+        {
+            color: crimson;
+            font-size: 13px;
+        }
+
+        .Back
+        {
+            font-size: 25px;
+        }
+    </style>
+
+    <script>
+        function Back()
+        {
+            window.history.back();
+        }        
+    </script>
+
+     <script>
+        function sendData(){
+            var arr = { photo: $("#photo").text(), extension: $("#extension").val(), date: $("#date").val()};            
+            $.ajax({
+                url: 'https://kbge8x0q3k.execute-api.us-east-2.amazonaws.com/dev',
+                type: 'POST',
+                data: JSON.stringify(arr),
+                contentType: 'application/json',
+                dataType: 'json',
+                async: true,
+                success: function(msg) {
+                    console.log(msg);                    
+                    if (msg.body.result == "OK"){                    
+                        $('#modal-success').modal('show'); 
+                        var imgPrev = document.getElementsByClassName('preview-img');                                
+                        imgPrev[0].src = "http://simpleicon.com/wp-content/uploads/account.png";
+                        resetearFecha();
+                    }else{
+                        $('#modal-error').modal('show'); 
+                    }
+                        
+                },
+                error: function(error){
+                    $('#modal-error').modal('show'); 
+                }
+            });
+        }
+
+        function resetearFecha(){
+            var today = new Date();
+              var dd = today.getDate();
+              var mm = today.getMonth()+1; //January is 0!
+              var yyyy = today.getFullYear();
+
+              if(dd<10) {
+                  dd = '0'+dd
+              } 
+
+              if(mm<10) {
+                  mm = '0'+mm
+              } 
+
+              today = yyyy + '-' + mm + '-' + dd;
+            $("#date").val(today);   
+        }
+    </script>
+</head>
+
+
+<body>
+
+    <div class="container">
+       <div class="Back">
+            <i class="fa fa-arrow-left" onclick="Back()"></i>
+        </div>
+        <p class="h2 text-center">Control de asistencia</p>
+        <p class="h6 text-center">Suba la foto de la asistencia de hoy e ingrese la fecha para registrar la asistencia</p>
+
+        <!-- <form> -->
+            <div class="preview text-center">
+                <img class="preview-img" src="http://simpleicon.com/wp-content/uploads/account.png" alt="Preview Image" width="400" height="400"/>
+                <div class="browse-button">
+                    <i class="fa fa-pencil-alt"></i>
+                    <input class="browse-input" type="file" required id="files" name="files"/>
+                </div>
+                <span class="Error"></span>
+
+
+                <div class="alert alert-success" id="success-alert" hidden="true" >
+                  <button type="button" class="close" data-dismiss="alert" >x</button>
+                  <strong>Correcto! </strong> Se ha registrado la asistencia exitosamente.
+                </div>
+
+                <div class="alert alert-danger" id="success-alert" hidden="true">
+                  <button type="button" class="close" data-dismiss="alert" >x</button>
+                  <strong>Esto no ha funcionado.</strong> No se ha podido registrar la asistencia.
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Fecha:</label>
+                <input class="form-control" type="date" name="date" id="date" required placeholder="Seleccione la fecha"/>
+                <script type="text/javascript">
+                    $(function(){
+                        resetearFecha(); 
+                    });                    
+                </script>
+                <span class="Error"></span>
+            </div>
+
+            <div class="form-group">
+                <!--<input class="btn btn-primary btn-block" type="submit" value="Submit"/>-->
+                <button class="btn btn-primary btn-block" onclick="sendData()">Registrar Asistencia</button>
+            </div>
+
+             <textarea id="photo" rows="5" hidden=""></textarea>
+    
+            <input id="extension" type="text" name="extension" hidden="">
+        <!--</form>-->
+    </div>
+
+
+    <!-- Modal -->
+    <div id="modal-success" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>            
+          </div>
+          <div class="modal-body">
+            <p>Asistencia registrada exitosamente</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal-error" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>            
+          </div>
+          <div class="modal-body">
+            <p>No pudo registrarse la asistencia</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+        // Check for the File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            document.getElementById('files').addEventListener('change', handleFileSelect, false);
+        } else {
+            alert('The File APIs are not fully supported in this browser.');
+        }
+
+        function handleFileSelect(evt) {
+            var f = evt.target.files[0]; // FileList object
+            var reader = new FileReader();
+            // Closure to capture the file information.
+            let name = f.name;
+            const lastDot = name.lastIndexOf('.');
+            const fileName = name.substring(0, lastDot);
+            const ext = name.substring(lastDot + 1);
+            $('#extension').val(ext);                                        
+
+            var imgPrev = document.getElementsByClassName('preview-img');                                
+            imgPrev[0].src = URL.createObjectURL(f);
+            
+            reader.onload = (function(theFile) {
+                return function(e) {
+                    var binaryData = e.target.result;
+                    //Converting Binary Data to base 64
+                    var base64String = window.btoa(binaryData);
+                    //showing file converted to base64
+                    $('#photo').text(base64String);                                                            
+                };
+            })(f);
+            // Read in the image file as a data URL.
+            reader.readAsBinaryString(f);
+
+
+        }
+    </script>
+</body>
+
+</html>
